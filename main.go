@@ -3,15 +3,31 @@ package main
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"go-apiserver/demo1/router"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go-apiserver/config"
+	"go-apiserver/router"
 	"log"
 	"net/http"
 	"time"
 )
 
-// 程序入库函数, 主要做配置文件解析,程序初始化, 路由加载
+var (
+	// 命令行指定配置文件
+	cfg = pflag.StringP("config", "c", "", "apiserver config file path")
+)
 
+// 程序入库函数, 主要做配置文件解析,程序初始化, 路由加载
 func main() {
+	pflag.Parse()
+	// 初始化配置
+	if err := config.Init(*cfg); err != nil {
+		panic(err)
+	}
+
+	// 设置gin的运行模式
+	gin.SetMode(viper.GetString("runmode"))
+
 	// 创建engine
 	g := gin.New()
 	middlewares := []gin.HandlerFunc{}
@@ -19,7 +35,7 @@ func main() {
 	// 调用router.Load来加载路由
 	router.Load(
 		g,
-		middlewares..., )
+		middlewares...)
 
 	// 启动的时候开一个协程验证是否成功
 	go func() {
@@ -29,14 +45,14 @@ func main() {
 		log.Print("The router has been deployed successfully.")
 	}()
 
-	log.Printf("Start to listening address: %s...", "8080")
-	log.Printf(http.ListenAndServe(":8080", g).Error())
+	log.Printf("Start to listening address: %s...", viper.GetString("addr"))
+	log.Printf(http.ListenAndServe(viper.GetString("addr"), g).Error())
 }
 
 // 检查接口正常
 func pingServer() error {
-	for i := 0; i < 3; i++ {
-		resp, err := http.Get("http://127.0.0.1:8080" + "/sd/health")
+	for i := 0; i < viper.GetInt("max_ping_count"); i++ {
+		resp, err := http.Get(viper.GetString("url") + "/sd/health")
 		if err == nil && resp.StatusCode == 200 {
 			return nil
 		}

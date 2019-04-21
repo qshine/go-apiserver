@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-apiserver/demo1/handler/sd"
-	"go-apiserver/demo1/router/middleware"
+	"go-apiserver/handler/sd"
+	"go-apiserver/router/middleware"
 	"net/http"
 )
 
