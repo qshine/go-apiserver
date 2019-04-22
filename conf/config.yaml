@@ -3,3 +3,12 @@ addr: :8888                  # HTTP绑定端口
 name: apiserver              # API Server的名字
 url: http://127.0.0.1:8888   # pingServer函数请求的API服务器的ip:port
 max_ping_count: 3           # pingServer函数try的次数
+log:   # 日志设置
+  writers: file,stdout    # 输出位置 文件/标准输出
+  logger_level: DEBUG
+  logger_file: log/apiserver.log
+  log_format_text: false   # 输出格式 json(true)/text(false)
+  rollingPolicy: size    # rotate依据  daily/size
+  log_rotate_date: 1
+  log_rotate_size: 1
+  log_backup_count: 7
