@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go-apiserver/config"
+	"go-apiserver/model"
 	"go-apiserver/router"
 	"net/http"
 	"time"
@@ -24,6 +25,11 @@ func main() {
 	if err := config.Init(*cfg); err != nil {
 		panic(err)
 	}
+
+	// 连接并最后进行关闭
+	model.DB.Init()
+	defer model.DB.Close()
+
 
 	// 设置gin的运行模式
 	gin.SetMode(viper.GetString("runmode"))
