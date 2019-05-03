@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"go-apiserver/handler/sd"
+	"go-apiserver/handler/user"
 	"go-apiserver/router/middleware"
 	"net/http"
 )
@@ -20,6 +21,12 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 	g.NoRoute(func(c *gin.Context) {
 		c.String(http.StatusNotFound, "The incorrect API route.")
 	})
+
+	// 用户组
+	u := g.Group("/v1/user")
+	{
+		u.POST("", user.Create)
+	}
 
 	// 健康检查handler组. 分别被路由到不同的处理函数
 	svcd := g.Group("/sd")

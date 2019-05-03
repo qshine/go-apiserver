@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/lexkong/log"
 	"github.com/spf13/viper"
 )
@@ -53,6 +54,7 @@ func GetSelfDB() *gorm.DB {
 	return InitSelfDB()
 }
 
+// 初始化连接
 func (db *Database) Init() {
 	DB = &Database{
 		Self: GetSelfDB(),

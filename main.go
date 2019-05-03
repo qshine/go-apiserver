@@ -30,7 +30,6 @@ func main() {
 	model.DB.Init()
 	defer model.DB.Close()
 
-
 	// 设置gin的运行模式
 	gin.SetMode(viper.GetString("runmode"))
 
