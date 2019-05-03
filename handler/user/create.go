@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
+	. "go-apiserver/handler"
 	"go-apiserver/pkg/errno"
 	"net/http"
 )
 
+// 新创建用户
 func Create(c *gin.Context) {
-	var r struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	var r CreateRequest
 
-	var err error
+	// Bind会检查Content-Type类型, 将消息体作为指定的格式解析到 Go struct 变量中
 	if err := c.Bind(&r); err != nil {
 		c.JSON(
 			http.StatusOK,
@@ -23,24 +22,31 @@ func Create(c *gin.Context) {
 		return
 	}
 
+	admin2 := c.Param("username")
+	log.Infof("URL username: %s", admin2)
+
+	// 查询url中参数
+	desc := c.Query("desc")
+	log.Infof("URL key param desc: %s", desc)
+
+	contentType := c.GetHeader("Content-Type")
+	log.Infof("Header Content-Type: %s", contentType)
+
 	log.Debugf("username is: [%s], password is [%s]", r.Username, r.Password)
 	if r.Username == "" {
-		// 创建一个错误并马上添加错误信息
-		err = errno.New(errno.ErrUserNotFound, fmt.Errorf("username can not found in db")).Add("This is add message.")
-		log.Errorf(err, "Get an error")
-	}
-
-	if errno.IsErrUserNotFound(err) {
-		log.Debug("err type is ErrUserNotFound")
+		err := errno.New(errno.ErrUserNotFound, fmt.Errorf("username can not found in db")).Add("This is add message.")
+		SendResponse(c, err, nil)
+		return
 	}
 
 	if r.Password == "" {
-		err = fmt.Errorf("password is empty")
+		err := fmt.Errorf("password is empty")
+		SendResponse(c, err, nil)
 	}
 
-	code, message := errno.DecodeErr(err)
-	c.JSON(
-		http.StatusOK,
-		gin.H{"code": code, "message": message},
-	)
+	resp := CreateResponse{
+		Username: r.Username,
+	}
+
+	SendResponse(c, nil, resp)
 }

@@ -25,7 +25,7 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 	// 用户组
 	u := g.Group("/v1/user")
 	{
-		u.POST("", user.Create)
+		u.POST("/:username", user.Create)
 	}
 
 	// 健康检查handler组. 分别被路由到不同的处理函数
