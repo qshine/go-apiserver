@@ -1,53 +1,62 @@
 package user
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
+	"github.com/lexkong/log/lager"
 	. "go-apiserver/handler"
+	"go-apiserver/model"
 	"go-apiserver/pkg/errno"
-	"net/http"
+	"go-apiserver/util"
 )
 
 // 新创建用户
 func Create(c *gin.Context) {
+	log.Info("User create function called", lager.Data{"X-Request-Id": util.GetReqID(c)})
 	var r CreateRequest
 
-	// Bind会检查Content-Type类型, 将消息体作为指定的格式解析到 Go struct 变量中
+	// Bind会检查Content-Type类型和参数, 将消息体作为指定的格式解析到 Go struct 变量中
 	if err := c.Bind(&r); err != nil {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"error": errno.ErrBind},
-		)
+		SendResponse(c, errno.ErrBind, nil)
 		return
 	}
 
-	admin2 := c.Param("username")
-	log.Infof("URL username: %s", admin2)
+	u := model.UserModel{
+		Username: r.Username,
+		Password: r.Password,
+	}
 
-	// 查询url中参数
-	desc := c.Query("desc")
-	log.Infof("URL key param desc: %s", desc)
-
-	contentType := c.GetHeader("Content-Type")
-	log.Infof("Header Content-Type: %s", contentType)
-
-	log.Debugf("username is: [%s], password is [%s]", r.Username, r.Password)
-	if r.Username == "" {
-		err := errno.New(errno.ErrUserNotFound, fmt.Errorf("username can not found in db")).Add("This is add message.")
-		SendResponse(c, err, nil)
+	// 检验参数
+	if err := r.checkParam(); err != nil {
+		SendResponse(c, errno.ErrValidation, nil)
 		return
+	}
+
+	// 加密密码
+	if err := u.Encrypt(); err != nil {
+		SendResponse(c, errno.ErrEncrypt, nil)
+		return
+	}
+
+	if err := u.Create(); err != nil {
+		SendResponse(c, errno.ErrDatabase, nil)
+		return
+	}
+	rsp := CreateResponse{
+		Username: r.Username,
+	}
+	SendResponse(c, nil, rsp)
+
+}
+
+func (r *CreateRequest) checkParam() error {
+	if r.Username == "" {
+		return errno.New(errno.ErrValidation, nil).Add("username is empty.")
 	}
 
 	if r.Password == "" {
-		err := fmt.Errorf("password is empty")
-		SendResponse(c, err, nil)
-		return
+		return errno.New(errno.ErrValidation, nil).Add("password is empty.")
 	}
 
-	resp := CreateResponse{
-		Username: r.Username,
-	}
-
-	SendResponse(c, nil, resp)
+	return nil
 }
