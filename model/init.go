@@ -30,7 +30,7 @@ func openDB(username, password, addr, name string) *gorm.DB {
 	if err != nil {
 		log.Errorf(err, "mysql database connection failed, db_name: %s", name)
 	}
-	// set for db connection
+	// 初始化db连接数
 	setupDB(db)
 
 	return db

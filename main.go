@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	// 命令行指定配置文件
+	// 命令行指定配置文件, 通过命令行指定不同的配置文件可以方便的区分不同的环境
 	cfg = pflag.StringP("config", "c", "", "apiserver config file path")
 )
 
@@ -30,7 +30,7 @@ func main() {
 	model.DB.Init()
 	defer model.DB.Close()
 
-	// 设置gin的运行模式
+	// 设置gin的运行模式 debug/release/test
 	gin.SetMode(viper.GetString("runmode"))
 
 	// 创建engine
