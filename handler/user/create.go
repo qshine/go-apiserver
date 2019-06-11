@@ -38,6 +38,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
+	// 保存数据到db
 	if err := u.Create(); err != nil {
 		SendResponse(c, errno.ErrDatabase, nil)
 		return

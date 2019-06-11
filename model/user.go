@@ -32,6 +32,11 @@ func DeleteUser(id uint64) error {
 
 // 更新用户
 func (u *UserModel) Update() error {
+	fmt.Println(u.Username)
+	fmt.Println(u.Password)
+	fmt.Println(u.Id)
+	fmt.Println("=====")
+
 	return DB.Self.Save(u).Error
 }
 
