@@ -9,6 +9,7 @@ import (
 	"go-apiserver/config"
 	"go-apiserver/model"
 	"go-apiserver/router"
+	"go-apiserver/router/middleware"
 	"net/http"
 	"time"
 )
@@ -35,12 +36,13 @@ func main() {
 
 	// 创建engine
 	g := gin.New()
-	middlewares := []gin.HandlerFunc{}
 
 	// 调用router.Load来加载路由
 	router.Load(
 		g,
-		middlewares...)
+		middleware.Logging(),   // 日志中间件
+		middleware.RequestId(), // 请求id中间件
+	)
 
 	// 启动的时候开一个协程验证是否成功
 	go func() {
