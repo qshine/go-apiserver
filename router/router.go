@@ -22,8 +22,13 @@ func Load(g *gin.Engine, mw ...gin.HandlerFunc) *gin.Engine {
 		c.String(http.StatusNotFound, "The incorrect API route.")
 	})
 
+	// 登录操作
+	g.POST("/login", user.Login)
+
 	// 用户组
 	u := g.Group("/v1/user")
+	// 针对该组使用签名验证
+	u.Use(middleware.AuthMiddleware())
 	{
 		u.POST("", user.Create)
 		u.DELETE("/:id", user.Delete)
