@@ -1,27 +1,44 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lexkong/log"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go-apiserver/config"
 	"go-apiserver/model"
+	v "go-apiserver/pkg/version"
 	"go-apiserver/router"
 	"go-apiserver/router/middleware"
 	"net/http"
+	"os"
 	"time"
 )
 
 var (
 	// 命令行指定配置文件, 通过命令行指定不同的配置文件可以方便的区分不同的环境
-	cfg = pflag.StringP("config", "c", "", "apiserver config file path")
+	cfg     = pflag.StringP("config", "c", "", "apiserver config file path")
+	version = pflag.BoolP("version", "v", false, "show version info.")
 )
 
 // 程序入库函数, 主要做配置文件解析,程序初始化, 路由加载
 func main() {
 	pflag.Parse()
+	if *version {
+		v := v.Get()
+		marshalled, err := json.MarshalIndent(&v, "", "  ")
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(string(marshalled))
+		return
+	}
+
 	// 初始化配置
 	if err := config.Init(*cfg); err != nil {
 		panic(err)
